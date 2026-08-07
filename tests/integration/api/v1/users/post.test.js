@@ -1,5 +1,7 @@
 import orchestrator from "../orchestrator";
 import { version as uuidVersion } from "uuid";
+import user from "models/user.js";
+import password from "models/password.js";
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices();
@@ -25,18 +27,36 @@ describe("POST /api/v1/users", () => {
       expect(response.status).toBe(201);
 
       const responseBody = await response.json();
+
       expect(responseBody).toEqual({
         id: responseBody.id,
         username: "filipedeschamps",
         email: "contato@curso.dev",
-        password: "senha123",
+        password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
+
       expect(uuidVersion(responseBody.id)).toBe(4);
       expect(Date.parse(responseBody.created_at)).not.toBeNaN();
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
+
+      const userInDatabase = await user.findOneByUsername("filipedeschamps");
+
+      const correctPasswordMatch = await password.compare(
+        "senha123",
+        userInDatabase.password,
+      );
+
+      const incorrectPasswordMatch = await password.compare(
+        "SenhaErrada",
+        userInDatabase.password,
+      );
+
+      expect(correctPasswordMatch).toBe(true);
+      expect(incorrectPasswordMatch).toBe(false);
     });
+
     test("Wish duplicated 'email'", async () => {
       const response1 = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
@@ -67,13 +87,15 @@ describe("POST /api/v1/users", () => {
       expect(response2.status).toBe(400);
 
       const response2Body = await response2.json();
+
       expect(response2Body).toEqual({
         name: "ValidationError",
-        message: "O email informado já está sendo utilizado,",
-        action: "Utilize outro email para realizar o cadastro.",
+        message: "O email informado já está sendo utilizado.",
+        action: "Utilize outro email para realizar esta operação.",
         status_code: 400,
       });
     });
+
     test("Wish duplicated username", async () => {
       const response1 = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
@@ -104,10 +126,11 @@ describe("POST /api/v1/users", () => {
       expect(response2.status).toBe(400);
 
       const response2Body = await response2.json();
+
       expect(response2Body).toEqual({
         name: "ValidationError",
-        message: "O username informado já está sendo utilizado,",
-        action: "Utilize username email para realizar o cadastro.",
+        message: "O username informado já está sendo utilizado.",
+        action: "Utilize outro username para realizar esta operação.",
         status_code: 400,
       });
     });
