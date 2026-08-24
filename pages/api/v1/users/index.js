@@ -6,6 +6,7 @@ import session from "models/session.js";
 const router = createRouter();
 
 router.get(getHandler);
+router.post(postHandler);
 
 export default router.handler(controller.errorHandlers);
 
@@ -22,5 +23,12 @@ async function getHandler(request, response) {
     "Cache-Control",
     "no-store, no-cache, max-age=0, must-revalidate",
   );
+
   return response.status(200).json(userFound);
+}
+
+async function postHandler(request, response) {
+  const userIputValues = request.body;
+  const newUser = await user.create(userIputValues);
+  return response.status(201).json(newUser);
 }
