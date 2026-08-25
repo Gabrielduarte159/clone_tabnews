@@ -1,7 +1,7 @@
 import { version as uuidVersion } from "uuid";
 import activation from "models/activation.js";
 import user from "models/user.js";
-import orchestrator from "tests/orchestrator.js";
+import orchestrator from "tests/integration/api/v1/orchestrator.js";
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices();
@@ -26,7 +26,7 @@ describe("PATCH /api/v1/activations/[token_id]", () => {
       expect(responseBody).toEqual({
         name: "NotFoundError",
         message:
-          "O token de ativação utilizado não foi encontrado no sistema ou expirou.",
+          "O token de ativação informado não foi encontrado no sistema ou expirou.",
         action: "Faça um novo cadastro.",
         status_code: 404,
       });
@@ -56,7 +56,7 @@ describe("PATCH /api/v1/activations/[token_id]", () => {
       expect(responseBody).toEqual({
         name: "NotFoundError",
         message:
-          "O token de ativação utilizado não foi encontrado no sistema ou expirou.",
+          "O token de ativação informado não foi encontrado no sistema ou expirou.",
         action: "Faça um novo cadastro.",
         status_code: 404,
       });
@@ -89,7 +89,7 @@ describe("PATCH /api/v1/activations/[token_id]", () => {
       expect(response2Body).toEqual({
         name: "NotFoundError",
         message:
-          "O token de ativação utilizado não foi encontrado no sistema ou expirou.",
+          "O token de ativação informado não foi encontrado no sistema ou expirou.",
         action: "Faça um novo cadastro.",
         status_code: 404,
       });
@@ -139,6 +139,7 @@ describe("PATCH /api/v1/activations/[token_id]", () => {
       expect(activatedUser.features).toEqual([
         "create:session",
         "read:session",
+        "update:user",
       ]);
     });
 
